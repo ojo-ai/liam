@@ -1,0 +1,190 @@
+---
+import '@fontsource/jetbrains-mono/latin-400.css';
+import '@fontsource/jetbrains-mono/latin-500.css';
+import { fade, ClientRouter } from 'astro:transitions';
+import { SEO } from 'astro-seo';
+import { Schema } from 'astro-seo-schema';
+import { SITE_NAME, DESCRIPTION } from '../config';
+
+interface Frontmatter {
+  title?: string;
+  description?: string;
+}
+
+interface Props {
+  frontmatter?: Frontmatter;
+}
+
+const { frontmatter = {} } = Astro.props;
+const isHome = Astro.url.pathname === `${import.meta.env.BASE_URL}` || Astro.url.pathname === '/';
+const pageTitle = [frontmatter.title ? frontmatter.title : undefined, isHome ? SITE_NAME : undefined]
+  .filter(Boolean)
+  .join(' | ');
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+const pageDescription = frontmatter.description || DESCRIPTION;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <SEO
+      title={pageTitle || SITE_NAME}
+      description={pageDescription}
+      canonical={canonicalURL}
+      openGraph={{
+        basic: {
+          title: pageTitle || SITE_NAME,
+          type: 'website',
+          image: `${Astro.site}liam/og.png`,
+        },
+        optional: {
+          description: pageDescription,
+          siteName: SITE_NAME,
+        },
+      }}
+      twitter={{
+        card: 'summary',
+        title: pageTitle || SITE_NAME,
+        description: pageDescription,
+      }}
+    />
+    <Schema
+      item={{
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: SITE_NAME,
+        url: canonicalURL,
+      }}
+    />
+    <ClientRouter />
+  </head>
+  <body>
+    <main transition:animate={fade({ duration: '0.2s' })}>
+      {!isHome && <a href={import.meta.env.BASE_URL}>home</a>}
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light;
+    --page-text: #0b0b0b;
+    --page-muted: #4b5563;
+    --page-bg: linear-gradient(90deg, #f5eae7, #e4e3e3, #dddddd, #ede8ec, #f4f2f2, #ffffff);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    min-height: 100%;
+    background: var(--page-bg);
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    background: var(--page-bg);
+    color: var(--page-text);
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  main {
+    width: min(690px, calc(100vw - 48px));
+    margin: 0 auto;
+    padding-top: 52px;
+    color: var(--page-text);
+  }
+
+  h1,
+  h2,
+  h3,
+  p,
+  ul,
+  ol {
+    margin: 0;
+  }
+
+  h1 {
+    font-size: 12px;
+    line-height: 1.6;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--page-text);
+  }
+
+  h2 {
+    margin-top: 44px;
+    margin-bottom: 18px;
+    font-size: 12px;
+    line-height: 1.6;
+    font-weight: 400;
+    color: var(--page-text);
+  }
+
+  p {
+    color: var(--page-text);
+  }
+
+  a {
+    color: var(--page-text);
+    text-decoration: none;
+    transition: opacity 120ms ease;
+  }
+
+  a:hover,
+  a:focus-visible {
+    opacity: 0.58;
+  }
+
+  a:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  .links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    margin-top: 2px;
+    color: var(--page-text);
+  }
+
+  .article-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .article-list li {
+    margin: 0;
+  }
+
+  @media (max-width: 520px) {
+    main {
+      width: calc(100vw - 40px);
+      padding-top: 36px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>

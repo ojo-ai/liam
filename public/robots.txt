@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ojo-ai.github.io/liam/sitemap-index.xml
